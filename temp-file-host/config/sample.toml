@@ -1,0 +1,12 @@
+[server]
+listen_addr = "0.0.0.0:11457"
+base_url = "http://localhost:11457"
+
+[storage]
+upload_dir = "/app/uploads"
+max_file_size_mb = 100
+cleanup_days = 3
+cleanup_schedule = "0 0 0 * * *"
+
+[logging]
+level = "info"  # Can be overridden by RUST_LOG environment variable 

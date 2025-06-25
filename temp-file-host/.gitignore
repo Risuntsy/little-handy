@@ -1,0 +1,5 @@
+/target
+/config/app_config.toml
+/.temporary_uploads
+todo.txt
+/.github

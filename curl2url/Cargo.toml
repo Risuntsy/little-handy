@@ -1,0 +1,11 @@
+[package]
+name = "curl2url"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+description = "A simple tool to convert curl command to URL"
+
+[dependencies]
+# 目前没有依赖，但可以从 workspace 中引用
+# anyhow.workspace = true
+# serde.workspace = true

@@ -1,0 +1,45 @@
+[workspace]
+members = ["curl2url", "temp-file-host"]
+resolver = "2"
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+authors = ["risun"]
+
+[workspace.dependencies]
+# 异步运行时
+tokio = { version = "1.0", features = ["full"] }
+tokio-util = { version = "0.7", features = ["full"] }
+
+# Web 框架
+axum = { version = "0.8", features = ["multipart"] }
+
+# 序列化
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+toml = "0.8"
+
+# 时间处理
+chrono = { version = "0.4", features = ["serde"] }
+
+# 工具库
+anyhow = "1.0"
+futures-util = "0.3"
+urlencoding = "2.1"
+dotenv = "0.15"
+filetime = "0.2"
+
+# 加密
+sha2 = "0.10"
+hex = "0.4"
+
+# 定时任务
+tokio-cron-scheduler = "0.13"
+
+# HTTP 中间件
+tower-http = { version = "0.6", features = ["trace", "fs"] }
+
+# 日志
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "time"] } 
