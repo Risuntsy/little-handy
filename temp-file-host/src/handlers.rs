@@ -46,7 +46,7 @@ pub async fn download_file(
     Query(query): Query<DownloadQuery>,
 ) -> Result<Response, AppError> {
     // 验证哈希格式 (16位十六进制)
-    if short_hash.len() != 16 || !short_hash.chars().all(|c| c.is_ascii_hexdigit()) {
+    if !utils_share::http::validate_hash_format(&short_hash) {
         tracing::warn!("Attempt to download with invalid hash: {}", short_hash);
         return Err(AppError::NotFound("Invalid file identifier".to_string()));
     }
@@ -57,7 +57,7 @@ pub async fn download_file(
         return Err(AppError::NotFound("File not found".to_string()));
     }
 
-    let safe_filename = query.filename.replace(['/', '\\'], "_");
+    let safe_filename = utils_share::http::sanitize_filename(&query.filename);
     let headers = HeaderMap::from_iter(vec![
         (
             header::CONTENT_TYPE,

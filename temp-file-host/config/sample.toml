@@ -1,12 +1,27 @@
 [server]
-listen_addr = "0.0.0.0:11457"
-base_url = "http://localhost:11457"
+listen_addr = "0.0.0.0:3001"
+base_url = "http://localhost:3001"
 
 [storage]
-upload_dir = "/app/uploads"
+upload_dir = "/tmp/temp-file-host/uploads"
 max_file_size_mb = 100
-cleanup_days = 3
-cleanup_schedule = "0 0 0 * * *"
+cleanup_days = 7
+cleanup_schedule = "0 0 4 * * *" # At 04:00 AM every day
 
 [logging]
-level = "info"  # Can be overridden by RUST_LOG environment variable 
+level = "info"
+
+[proxy]
+# Cache time-to-live for completed proxy downloads in seconds
+cache_ttl_seconds = 3600 # 1 hour
+# Cache max capacity
+cache_max_capacity = 1000
+# Timeout for fetching data from remote URL in seconds
+remote_request_timeout_seconds = 300 # 5 minutes
+# Max concurrent proxy download jobs
+max_concurrent_jobs = 10
+
+[auth]
+# A simple list of tokens allowed to use the proxy endpoint
+# In a real scenario, use a more secure method
+allowed_tokens = ["insecure-token-for-internal-use-only"] 

@@ -1,0 +1,12 @@
+[server]
+listen_addr = "0.0.0.0:3000"
+
+[proxy]
+temp_file_host_url = "http://localhost:3001"
+max_response_size_bytes = 1048576 # 1MB
+auth_token = "insecure-token-for-internal-use-only"
+
+[curl]
+timeout_seconds = 30
+follow_redirects = true
+include_headers = true 

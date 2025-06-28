@@ -3,7 +3,7 @@ use axum::{
     response::{IntoResponse, Json, Response},
 };
 use serde::Serialize;
-use std::io;
+use anyhow;
 
 #[derive(Serialize)]
 pub struct UploadResponse {
@@ -12,51 +12,51 @@ pub struct UploadResponse {
     pub sha256_hash: String,
 }
 
+#[derive(Debug, Serialize)]
+pub struct FileMeta {
+    pub original_filename: String,
+    pub sha256_hash: String,
+    pub short_hash: String,
+}
+
+#[derive(Debug)]
 pub enum AppError {
-    IoError(io::Error),
-    MultipartError(axum::extract::multipart::MultipartError),
-    PayloadTooLarge(String),
+    UserError(String),
+    InternalError(anyhow::Error),
     NotFound(String),
-    UserError(String),   // 客户端请求问题
-    ServerError(String), // 服务器内部问题
+    ServiceUnavailable(String),
 }
 
 impl IntoResponse for AppError {
     fn into_response(self) -> Response {
-        let (status, error_message) = match self {
-            AppError::IoError(e) => {
-                tracing::error!("I/O error: {}", e);
-                (
-                    StatusCode::INTERNAL_SERVER_ERROR,
-                    format!("Internal Server Error: {}", e),
-                )
-            }
-            AppError::MultipartError(e) => {
-                tracing::error!("Multipart error: {}", e);
-                (
-                    StatusCode::BAD_REQUEST,
-                    format!("Bad Request: Invalid multipart data: {}", e),
-                )
-            }
-            AppError::PayloadTooLarge(msg) => (StatusCode::PAYLOAD_TOO_LARGE, msg),
-            AppError::NotFound(msg) => (StatusCode::NOT_FOUND, msg),
+        let (status, message) = match self {
             AppError::UserError(msg) => (StatusCode::BAD_REQUEST, msg),
-            AppError::ServerError(msg) => (StatusCode::INTERNAL_SERVER_ERROR, msg),
+            AppError::InternalError(err) => {
+                tracing::error!("Internal error: {:?}", err);
+                (StatusCode::INTERNAL_SERVER_ERROR, "Internal server error".to_string())
+            }
+            AppError::NotFound(msg) => (StatusCode::NOT_FOUND, msg),
+            AppError::ServiceUnavailable(msg) => (StatusCode::SERVICE_UNAVAILABLE, msg),
         };
-
-        let body = Json(serde_json::json!({ "error": error_message }));
+        let body = Json(serde_json::json!({ "error": message }));
         (status, body).into_response()
     }
 }
 
-impl From<io::Error> for AppError {
-    fn from(err: io::Error) -> Self {
-        AppError::IoError(err)
+impl From<anyhow::Error> for AppError {
+    fn from(err: anyhow::Error) -> Self {
+        AppError::InternalError(err)
+    }
+}
+
+impl From<std::io::Error> for AppError {
+    fn from(err: std::io::Error) -> Self {
+        AppError::InternalError(err.into())
     }
 }
 
 impl From<axum::extract::multipart::MultipartError> for AppError {
     fn from(err: axum::extract::multipart::MultipartError) -> Self {
-        AppError::MultipartError(err)
+        AppError::UserError(format!("Multipart error: {}", err))
     }
 } 

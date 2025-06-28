@@ -1,0 +1,33 @@
+[package]
+name = "utils-share"
+version = "0.0.1"
+edition.workspace = true
+authors.workspace = true
+
+[dependencies]
+# HTTP 和 Web 相关
+axum = { workspace = true }
+reqwest = { workspace = true }
+
+# 序列化
+serde = { workspace = true }
+serde_json = { workspace = true }
+
+# 错误处理
+anyhow = { workspace = true }
+
+# 加密和哈希
+sha1 = { workspace = true }
+sha2 = { workspace = true }
+hex = { workspace = true }
+hmac = { workspace = true }
+
+# 时间处理
+chrono = { workspace = true }
+
+# 日志
+tracing = { workspace = true }
+
+# 其他工具
+uuid = { workspace = true }
+url = { workspace = true }

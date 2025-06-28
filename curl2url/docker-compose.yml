@@ -1,0 +1,47 @@
+version: '3.8'
+
+services:
+  curl2url:
+    build:
+      context: ..
+      dockerfile: curl2url/Dockerfile
+    container_name: curl2url
+    ports:
+      - "3000:3000"
+    environment:
+      - RUST_LOG=info
+    volumes:
+      - ./config:/app/config:ro
+    restart: unless-stopped
+    networks:
+      - curl2url-network
+    depends_on:
+      - temp-file-host
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  temp-file-host:
+    image: temp-file-host:latest
+    container_name: temp-file-host
+    ports:
+      - "8080:8080"
+    environment:
+      - RUST_LOG=info
+      - APP_CONFIG_PATH=/app/config/sample.toml
+    volumes:
+      - temp-uploads:/app/uploads
+      - ../temp-file-host/config:/app/config:ro
+    restart: unless-stopped
+    networks:
+      - curl2url-network
+
+networks:
+  curl2url-network:
+    driver: bridge
+
+volumes:
+  temp-uploads: 

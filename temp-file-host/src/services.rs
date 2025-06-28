@@ -1,9 +1,13 @@
 use crate::models::AppError;
+use anyhow::Result;
+use axum::body::Bytes;
 use chrono::Utc;
 use filetime::{FileTime, set_file_mtime};
 use futures_util::StreamExt;
 use sha2::Digest;
-use std::path::PathBuf;
+use std::sync::Arc;
+use std::{io::Write, path::PathBuf};
+use tempfile::NamedTempFile;
 use tokio::{fs, io::AsyncWriteExt};
 use tracing::{info, warn};
 
@@ -88,7 +92,7 @@ pub async fn save_file(
             );
             // 清理临时文件
             let _ = fs::remove_file(&temp_path).await;
-            return Err(AppError::PayloadTooLarge(format!(
+            return Err(AppError::UserError(format!(
                 "File size exceeds limit of {} MB",
                 state.max_file_size / 1024 / 1024
             )));
@@ -129,6 +133,48 @@ pub async fn save_file(
     }
 
     Ok((original_filename, short_hash.to_string()))
+}
+
+pub async fn save_file_from_bytes(
+    state: &Arc<crate::config::AppState>,
+    bytes: Bytes,
+    original_filename: &str,
+) -> Result<crate::models::FileMeta> {
+    if bytes.len() > state.max_file_size {
+        return Err(anyhow::anyhow!(
+            "File size {} exceeds limit of {}",
+            bytes.len(),
+            state.max_file_size
+        ));
+    }
+
+    let sha256_hash = utils_share::crypto::sha256_hash(&bytes);
+    let short_hash = utils_share::crypto::sha256_short_hash(&bytes);
+    let file_path = state.upload_path.join(&short_hash);
+
+    if !file_path.exists() {
+        let mut temp_file = NamedTempFile::new_in(&state.upload_path)?;
+        temp_file.write_all(&bytes)?;
+        temp_file.persist(&file_path)?;
+        info!(
+            "New file saved: '{}' -> {:?} ({} bytes, hash: {})",
+            original_filename,
+            file_path,
+            bytes.len(),
+            short_hash
+        );
+    } else {
+        info!(
+            "File already exists, skipping save: '{}' (hash: {})",
+            original_filename, short_hash
+        );
+    }
+
+    Ok(crate::models::FileMeta {
+        original_filename: original_filename.to_string(),
+        sha256_hash: sha256_hash.clone(),
+        short_hash,
+    })
 }
 
 #[tokio::test]

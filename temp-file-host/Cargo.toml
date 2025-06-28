@@ -1,25 +1,42 @@
 [package]
 name = "temp-file-host"
-version.workspace = true
+version = "0.0.1"
 edition.workspace = true
 authors.workspace = true
 
 [dependencies]
-axum.workspace = true
+# web & async
 tokio.workspace = true
 tokio-util.workspace = true
+axum.workspace = true
+tower-http.workspace = true
+reqwest.workspace = true
+
+# serialization & config
 serde.workspace = true
 serde_json.workspace = true
-chrono.workspace = true
-futures-util.workspace = true
-sha2.workspace = true
-hex.workspace = true
-tokio-cron-scheduler.workspace = true
-tower-http.workspace = true
-tracing.workspace = true
-tracing-subscriber.workspace = true
-anyhow.workspace = true
-urlencoding.workspace = true
 toml.workspace = true
 dotenv.workspace = true
+
+# utils
+anyhow.workspace = true
+futures-util.workspace = true
+urlencoding.workspace = true
 filetime.workspace = true
+chrono.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true
+
+# crypto
+sha2.workspace = true
+hex.workspace = true
+
+# background jobs & cache
+tokio-cron-scheduler.workspace = true
+moka.workspace = true
+uuid.workspace = true
+dashmap.workspace = true
+
+# temp files
+tempfile.workspace = true
+utils-share = { path = "../utils-share" }

@@ -1,0 +1,17 @@
+[server]
+# Server listening address
+listen_addr = "0.0.0.0:3000"
+
+[proxy]
+# Temp file host URL for large responses
+temp_file_host_url = "http://localhost:3001"
+# Maximum response size in bytes before uploading to temp file host
+max_response_size_bytes = 1048576  # 1MB
+
+[curl]
+# Default curl timeout in seconds
+timeout_seconds = 30
+# Follow redirects
+follow_redirects = true
+# Include response headers
+include_headers = true 

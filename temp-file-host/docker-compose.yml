@@ -1,18 +1,33 @@
+version: '3.8'
+
 services:
-  app:
+  temp-file-host:
     build:
-      context: .
-      dockerfile: ./Dockerfile
+      context: ..
+      dockerfile: temp-file-host/Dockerfile
     image: temp-file-host:${TAG:-latest}
     container_name: temp-file-host
     ports:
-      - "11457:11457"
-    volumes:
-      - ./config/app_config.toml:/app/config/app_config.toml
+      - "8080:8080"
     environment:
       - RUST_LOG=info
+      - APP_CONFIG_PATH=/app/config/sample.toml
+    volumes:
+      - temp-uploads:/app/uploads
+      - ./config:/app/config:ro
+    restart: unless-stopped
+    networks:
+      - temp-file-network
     healthcheck:
-      test: ["CMD", "wget", "--spider", "-q", "http://0.0.0.0:11457/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
       interval: 30s
       timeout: 10s
-      retries: 3 
+      retries: 3
+      start_period: 40s
+
+networks:
+  temp-file-network:
+    driver: bridge
+
+volumes:
+  temp-uploads: 
